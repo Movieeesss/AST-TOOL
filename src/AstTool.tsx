@@ -39,84 +39,60 @@ const AstTool = () => {
   const manualStatus = totalManualAst >= num(reqAst) && manualSpacing >= 25 && num(reqAst) > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-slate-900 pb-10">
-      {/* Header - Fixed for Mobile */}
-      <div className="bg-slate-900 text-white p-4 text-center sticky top-0 z-10 shadow-md">
-        <h1 className="text-xl md:text-2xl font-black uppercase leading-tight">AST Tool — Beam</h1>
-        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Structural Calculator</p>
+    <div className="min-h-screen bg-white font-sans text-black pb-10">
+      {/* Header */}
+      <div className="bg-black text-white p-4 text-center sticky top-0 z-20 shadow-lg border-b-2 border-blue-600">
+        <h1 className="text-xl font-black uppercase tracking-tighter">AST TOOL — BEAM</h1>
+        <p className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">Reinforcement Calculator</p>
       </div>
 
-      <div className="p-3 md:p-6 max-w-4xl mx-auto space-y-4">
+      <div className="p-3 max-w-lg mx-auto space-y-4">
         
-        {/* Input Grid - 2 columns on mobile */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Input Section */}
+        <div className="grid grid-cols-2 gap-2 bg-gray-50 p-2 border border-gray-300 rounded shadow-sm">
           {[
-            { label: 'Breadth (mm)', val: breadth, set: setBreadth, bg: 'bg-yellow-100 border-yellow-400' },
-            { label: 'Eff. Depth (mm)', val: effDepth, set: setEffDepth, bg: 'bg-yellow-100 border-yellow-400' },
-            { label: 'Req. Ast (mm²)', val: reqAst, set: setReqAst, bg: 'bg-blue-100 border-blue-500' },
-            { label: 'Cover (mm)', val: cover, set: setCover, bg: 'bg-white border-slate-300' },
+            { label: 'Breadth (mm)', val: breadth, set: setBreadth, bg: 'bg-yellow-300' },
+            { label: 'Depth (mm)', val: effDepth, set: setEffDepth, bg: 'bg-yellow-300' },
+            { label: 'Req. Ast (mm²)', val: reqAst, set: setReqAst, bg: 'bg-blue-600 text-white' },
+            { label: 'Cover (mm)', val: cover, set: setCover, bg: 'bg-white' },
           ].map((item, idx) => (
             <div key={idx} className="flex flex-col">
-              <label className="text-[10px] font-black text-slate-500 uppercase ml-1 mb-1">{item.label}</label>
+              <label className="text-[9px] font-black text-gray-600 uppercase mb-1 ml-1">{item.label}</label>
               <input 
                 type="text" 
                 inputMode="decimal"
                 value={item.val} 
                 onChange={(e) => item.set(e.target.value)}
-                className={`p-3 border-2 rounded-lg font-black text-lg outline-none transition-all ${item.bg}`}
+                className={`p-3 border border-black font-black text-lg rounded outline-none shadow-inner ${item.bg}`}
               />
             </div>
           ))}
         </div>
 
-        {/* Data Display - Becomes Cards on Mobile, Table on Desktop */}
-        <div className="hidden md:block overflow-hidden rounded-xl border border-slate-300 bg-white">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-800 text-white text-[10px] uppercase">
-              <tr>
-                <th className="p-3 border-r border-slate-700">Dia</th>
-                <th className="p-3 border-r border-slate-700">NOS</th>
-                <th className="p-3 border-r border-slate-700">Provided Ast</th>
-                <th className="p-3 border-r border-slate-700">Pt (%)</th>
-                <th className="p-3 border-r border-slate-700">Spacing</th>
-                <th className="p-3 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200">
-              {diameters.map(dia => {
-                const data = calculateRow(dia);
-                return (
-                  <tr key={dia} className="font-bold text-sm">
-                    <td className="p-3 bg-slate-50 border-r border-slate-200 text-red-600">{dia}</td>
-                    <td className={`p-3 border-r border-slate-200 ${data.isOk ? 'text-green-600' : 'text-red-600'}`}>{data.nos}</td>
-                    <td className="p-3 border-r border-slate-200">{data.providedAst.toFixed(2)}</td>
-                    <td className="p-3 border-r border-slate-200">{data.pt.toFixed(3)}</td>
-                    <td className="p-3 border-r border-slate-200">{data.spacing.toFixed(1)}</td>
-                    <td className={`p-3 text-center text-white text-xs ${data.isOk ? 'bg-green-600' : 'bg-red-600'}`}>{data.isOk ? 'OK' : 'NOT OK'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        {/* Auto Options Header */}
+        <h2 className="text-xs font-black uppercase border-l-4 border-red-600 pl-2 ml-1 text-gray-700">Auto Solutions</h2>
 
-        {/* Mobile View Cards (Hidden on Desktop) */}
-        <div className="md:hidden space-y-2">
+        {/* Mobile-Friendly Data Cards */}
+        <div className="space-y-2">
           {diameters.map(dia => {
             const data = calculateRow(dia);
             return (
-              <div key={dia} className={`flex items-center justify-between p-3 rounded-lg border-l-8 bg-white shadow-sm border ${data.isOk ? 'border-l-green-600' : 'border-l-red-600'}`}>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="bg-slate-800 text-white px-2 py-0.5 rounded text-xs font-bold">{dia}mm</span>
-                    <span className="font-black text-slate-900">NOS: {data.nos}</span>
+              <div key={dia} className="flex flex-col border border-gray-400 rounded overflow-hidden shadow-sm">
+                <div className="flex items-center">
+                  <div className="bg-red-600 text-white p-3 font-black text-lg w-16 text-center border-r border-gray-400">
+                    {dia}
                   </div>
-                  <div className="text-[10px] font-bold text-slate-500 mt-1 uppercase">
-                    Ast: {data.providedAst.toFixed(1)} | Spacing: {data.spacing.toFixed(1)}
+                  <div className={`flex-1 p-2 font-black text-sm text-center border-r border-gray-400 ${data.isOk ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                    NOS: {data.nos}
+                  </div>
+                  <div className={`w-24 p-2 font-black text-xs text-center ${data.isOk ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
+                    {data.isOk ? 'OK' : 'NOT OK'}
                   </div>
                 </div>
-                <div className={`font-black text-[10px] px-2 py-1 rounded ${data.isOk ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
-                  {data.isOk ? 'SAFE' : 'UNSAFE'}
+                <div className="flex bg-orange-100 text-[10px] font-bold p-2 divide-x divide-gray-300">
+                  <div className="flex-1 text-center">Ast: {data.providedAst.toFixed(1)}</div>
+                  <div className="flex-1 text-center">Pt: {data.pt.toFixed(3)}%</div>
+                  <div className="flex-1 text-center">Space: {data.spacing.toFixed(1)}mm</div>
                 </div>
               </div>
             );
@@ -124,40 +100,44 @@ const AstTool = () => {
         </div>
 
         {/* Manual Mix Section */}
-        <div className="bg-slate-900 rounded-xl p-4 shadow-xl">
-          <h2 className="text-blue-400 text-[10px] font-black uppercase mb-3 tracking-widest text-center">Enter Provided Value (Mixed)</h2>
-          <div className="flex gap-2 mb-4">
+        <div className="bg-black rounded p-3 shadow-xl">
+          <h2 className="bg-blue-600 text-white text-[10px] font-black uppercase px-2 py-1 mb-3 inline-block">Enter Provided Bars (Mixed)</h2>
+          <div className="space-y-2 mb-4">
             {[ {s: manual1, set: setManual1}, {s: manual2, set: setManual2} ].map((item, i) => (
-              <div key={i} className="flex-1 flex gap-1">
+              <div key={i} className="flex gap-1">
                 <select 
                   value={item.s.dia} 
                   onChange={(e) => item.set({...item.s, dia: Number(e.target.value)})}
-                  className="bg-yellow-400 p-2 rounded-lg font-black text-sm w-full outline-none"
+                  className="flex-1 bg-yellow-300 p-3 rounded font-black text-base border border-gray-400 outline-none"
                 >
-                  {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
+                  {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
                 </select>
                 <input 
                   type="text" 
                   inputMode="numeric"
                   value={item.s.nos} 
                   onChange={(e) => item.set({...item.s, nos: e.target.value})}
-                  className="w-12 bg-white p-2 rounded-lg font-black text-center text-sm outline-none"
+                  className="w-20 bg-white p-3 rounded font-black text-center text-lg border border-gray-400 outline-none"
+                  placeholder="Nos"
                 />
               </div>
             ))}
           </div>
           
-          <div className={`p-4 rounded-lg flex items-center justify-between ${manualStatus ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
-            <div className="text-left">
-              <div className="text-[10px] font-black uppercase opacity-75 leading-none">Total Ast</div>
-              <div className="text-xl font-black">{totalManualAst.toFixed(2)}</div>
+          {/* Final Design Status Card */}
+          <div className={`p-4 rounded border-2 flex flex-col items-center justify-center transition-all ${manualStatus ? 'bg-green-500 border-white' : 'bg-red-600 border-white'}`}>
+            <div className="flex justify-around w-full text-white mb-2">
+              <div className="text-center">
+                <div className="text-[9px] font-black uppercase opacity-80">Total Ast</div>
+                <div className="text-xl font-black">{totalManualAst.toFixed(1)}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-[9px] font-black uppercase opacity-80">Spacing</div>
+                <div className="text-xl font-black">{manualSpacing.toFixed(1)}</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-[10px] font-black uppercase opacity-75 leading-none">Spacing</div>
-              <div className="text-xl font-black">{manualSpacing.toFixed(1)}</div>
-            </div>
-            <div className="text-right font-black text-sm leading-tight">
-              {manualStatus ? 'DESIGN\nSAFE' : 'DESIGN\nFAILED'}
+            <div className="text-white font-black text-lg tracking-widest border-t border-white/30 pt-2 w-full text-center uppercase">
+              {manualStatus ? '✓ Design OK' : '✕ Design Failed'}
             </div>
           </div>
         </div>
