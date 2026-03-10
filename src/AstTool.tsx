@@ -56,17 +56,13 @@ const AstTool = () => {
     : 0;
   const designOk = totalProvAst >= calc.targetAst && (totalNos <= 1 || mixedSpace >= 25);
 
-  const getReportText = () => {
-    return `*AST TOOL (BEAM) REPORT*%0A---------------------------%0A*Beam Size:* ${inputs.breadth} x ${inputs.overallDepth} mm%0A*Req. Ast:* ${inputs.reqAst} mm²%0A%0A*Provided Reinforcement:*%0A- ${manual1.nos} nos of ${manual1.dia}mm%0A- ${manual2.nos} nos of ${manual2.dia}mm%0A%0A*Total Ast:* ${totalProvAst.toFixed(2)} mm²%0A*Spacing:* ${mixedSpace.toFixed(0)} mm%0A*Status:* ${designOk ? '✅ DESIGN OK' : '❌ DESIGN FAIL'}`;
-  };
-
-  const shareWhatsApp = () => {
-    const url = `https://wa.me/?text=${getReportText()}`;
-    window.open(url, '_blank');
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInputs(prev => ({ ...prev, [name]: value }));
   };
 
   const copyToClipboard = () => {
-    const text = getReportText().replace(/%0A/g, '\n');
+    const text = `*AST TOOL (BEAM) REPORT*\nSize: ${inputs.breadth}x${inputs.overallDepth}\nReq Ast: ${inputs.reqAst}\nProv: ${totalProvAst.toFixed(2)}mm²\nStatus: ${designOk ? 'OK' : 'FAIL'}`;
     navigator.clipboard.writeText(text);
     alert("Report copied!");
   };
@@ -87,31 +83,28 @@ const AstTool = () => {
              <span>Overall Depth (D) mm</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <input type="number" value={inputs.breadth} onChange={(e) => setInputs({...inputs, breadth: e.target.value})} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
-            <input type="number" value={inputs.overallDepth} onChange={(e) => setInputs({...inputs, overallDepth: e.target.value})} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
+            <input name="breadth" type="number" value={inputs.breadth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
+            <input name="overallDepth" type="number" value={inputs.overallDepth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
           </div>
 
-          {/* Info & Clear Row */}
-          <div className="grid grid-cols-3 bg-[#ffff00]/30 border border-black/10 rounded-sm overflow-hidden h-14">
+          {/* Info Row (Clear All removed from here) */}
+          <div className="grid grid-cols-2 bg-[#ffff00]/30 border border-black/10 rounded-sm overflow-hidden h-14">
             <div className="flex flex-col items-center justify-center border-r border-black/10">
               <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Eff. Depth (d)</span>
               <span className="text-lg font-black">{calc.effectiveD.toFixed(0)} mm</span>
             </div>
-            <div className="flex flex-col items-center justify-center border-r border-black/10">
+            <div className="flex flex-col items-center justify-center">
               <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Main Bar Ø</span>
-              <select value={inputs.mainDia} onChange={(e) => setInputs({...inputs, mainDia: e.target.value})} className="text-lg font-black bg-transparent outline-none">
+              <select name="mainDia" value={inputs.mainDia} onChange={handleChange} className="text-lg font-black bg-transparent outline-none">
                 {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
               </select>
             </div>
-            <button onClick={clearAll} className="bg-gray-200 text-black font-black uppercase text-[10px] h-full flex items-center justify-center active:bg-gray-300">
-              CLEAR ALL
-            </button>
           </div>
 
           {/* Ast Required Section */}
           <div className="bg-[#4472c4] p-3 text-center rounded-sm">
             <label className="text-white text-[11px] font-black uppercase block mb-1">Ast Required (mm²)</label>
-            <input type="number" value={inputs.reqAst} onChange={(e) => setInputs({...inputs, reqAst: e.target.value})} className="w-full bg-[#ffff00] text-center text-3xl font-black py-1 rounded-sm outline-none" />
+            <input name="reqAst" type="number" value={inputs.reqAst} onChange={handleChange} className="w-full bg-[#ffff00] text-center text-3xl font-black py-1 rounded-sm outline-none" />
           </div>
 
           {/* Results Table */}
@@ -138,18 +131,14 @@ const AstTool = () => {
           <div className="rounded-sm overflow-hidden border-2 border-[#4472c4]">
             <div className="bg-[#4472c4] text-white text-[10px] font-black py-2 text-center uppercase tracking-widest">Enter Provided Bars (Mixed)</div>
             <div className="p-2 space-y-2 bg-gray-50">
-              <div className="flex gap-2">
-                <select value={manual1.dia} onChange={(e) => setManual1({...manual1, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] font-black p-2 rounded-sm outline-none border border-black/10 text-lg">
-                  {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
-                </select>
-                <input type="number" value={manual1.nos} onChange={(e) => setManual1({...manual1, nos: e.target.value})} className="w-24 bg-white border border-gray-300 text-center font-black text-2xl rounded-sm shadow-inner" placeholder="Nos" />
-              </div>
-              <div className="flex gap-2">
-                <select value={manual2.dia} onChange={(e) => setManual2({...manual2, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] font-black p-2 rounded-sm outline-none border border-black/10 text-lg">
-                  {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
-                </select>
-                <input type="number" value={manual2.nos} onChange={(e) => setManual2({...manual2, nos: e.target.value})} className="w-24 bg-white border border-gray-300 text-center font-black text-2xl rounded-sm shadow-inner" placeholder="Nos" />
-              </div>
+              {[ {v: manual1, s: setManual1}, {v: manual2, s: setManual2} ].map((row, i) => (
+                <div key={i} className="flex gap-2">
+                  <select value={row.v.dia} onChange={(e) => row.s({...row.v, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] font-black p-2 rounded-sm outline-none border border-black/10 text-lg">
+                    {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
+                  </select>
+                  <input type="number" value={row.v.nos} onChange={(e) => row.s({...row.v, nos: e.target.value})} className="w-24 bg-white border border-gray-300 text-center font-black text-2xl rounded-sm shadow-inner" placeholder="Nos" />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -166,13 +155,13 @@ const AstTool = () => {
             <div className="text-3xl font-black italic tracking-tighter">{designOk ? '✓ OK' : '✕ FAIL'}</div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-2 pb-2">
-            <button onClick={copyToClipboard} className="bg-[#efefef] text-black py-4 font-black uppercase text-xs tracking-widest rounded-sm border border-gray-300 active:bg-gray-200">
+          {/* Action Buttons (Clear All moved here) */}
+          <div className="space-y-2 pb-2">
+            <button onClick={copyToClipboard} className="w-full bg-[#efefef] text-black py-4 font-black uppercase text-xs tracking-widest rounded-sm border border-gray-300 active:bg-gray-200 shadow-md">
               Copy Result
             </button>
-            <button onClick={shareWhatsApp} className="bg-[#25D366] text-white py-4 font-black uppercase text-xs tracking-widest rounded-sm active:bg-[#128C7E] shadow-md">
-              WhatsApp
+            <button onClick={clearAll} className="w-full bg-red-600 text-white py-4 font-black uppercase text-xs tracking-widest rounded-sm active:bg-red-700 shadow-md">
+              Clear All
             </button>
           </div>
         </div>
