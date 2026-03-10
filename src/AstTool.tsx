@@ -1,160 +1,151 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 const AstTool = () => {
-  // Input states
-  const [breadth, setBreadth] = useState('230');
-  const [effDepth, setEffDepth] = useState('392');
-  const [reqAst, setReqAst] = useState('695.32');
-  const [cover, setCover] = useState('25');
+  // Input states as strings to prevent cursor jumping and typing lag
+  const [inputs, setInputs] = useState({
+    breadth: '230',
+    overallDepth: '425',
+    reqAst: '695.32',
+    cover: '25',
+    mainDia: '16'
+  });
 
   const [manual1, setManual1] = useState({ dia: 16, nos: '3' });
   const [manual2, setManual2] = useState({ dia: 12, nos: '1' });
 
   const diameters = [10, 12, 16, 20, 25];
-  const num = (val) => (val === '' ? 0 : parseFloat(val));
 
-  const calculateRow = (dia, isManual = false, manualNos = 0) => {
-    const b = num(breadth);
-    const d = num(effDepth);
-    const targetAst = num(reqAst);
-    const c = num(cover);
+  // Optimized Calculation Logic
+  const calc = useMemo(() => {
+    const B = parseFloat(inputs.breadth) || 0;
+    const D = parseFloat(inputs.overallDepth) || 0;
+    const C = parseFloat(inputs.cover) || 0;
+    const DIA = parseFloat(inputs.mainDia) || 0;
+    const targetAst = parseFloat(inputs.reqAst) || 0;
 
-    const areaOneBar = (Math.PI * Math.pow(dia, 2)) / 4;
-    const nos = isManual ? manualNos : Math.ceil(targetAst / areaOneBar);
-    const providedAst = nos * areaOneBar;
-    const pt = b > 0 && d > 0 ? (providedAst * 100) / (b * d) : 0;
-    const spacing = nos > 1 ? (b - (2 * c) - (nos * dia)) / (nos - 1) : b - (2 * c) - dia;
-    
-    // Logic for OK/NOT OK based on your reference
-    const isOk = providedAst >= targetAst && spacing >= 25 && targetAst > 0;
+    // d = D - Cover - (Main Bar Dia / 2)
+    const effectiveD = D > 0 ? D - C - (DIA / 2) : 0;
 
-    return { nos, providedAst, pt, spacing, isOk };
+    const getRowData = (dia, isManual = false, mNos = 0) => {
+      const areaOne = (Math.PI * Math.pow(dia, 2)) / 4;
+      const nos = isManual ? mNos : Math.ceil(targetAst / areaOne);
+      const provAst = nos * areaOne;
+      const pt = (B > 0 && effectiveD > 0) ? (provAst * 100) / (B * effectiveD) : 0;
+      const space = nos > 1 ? (B - (2 * C) - (nos * dia)) / (nos - 1) : 0;
+      const isOk = provAst >= targetAst && space >= 25 && targetAst > 0;
+      return { nos, provAst, pt, space, isOk };
+    };
+
+    return { B, D, effectiveD, targetAst, C, getRowData };
+  }, [inputs]);
+
+  // Manual Summary Calculation
+  const m1 = calc.getRowData(manual1.dia, true, parseFloat(manual1.nos) || 0);
+  const m2 = calc.getRowData(manual2.dia, true, parseFloat(manual2.nos) || 0);
+  const totalProvAst = m1.provAst + m2.provAst;
+  const totalNos = (parseFloat(manual1.nos) || 0) + (parseFloat(manual2.nos) || 0);
+  const mixedSpace = totalNos > 1 
+    ? (calc.B - (2 * calc.C) - ( (parseFloat(manual1.nos)*manual1.dia) + (parseFloat(manual2.nos)*manual2.dia) )) / (totalNos - 1)
+    : 0;
+  const designOk = totalProvAst >= calc.targetAst && mixedSpace >= 25;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInputs(prev => ({ ...prev, [name]: value }));
   };
 
-  // Manual Calculation Logic
-  const m1 = calculateRow(manual1.dia, true, num(manual1.nos));
-  const m2 = calculateRow(manual2.dia, true, num(manual2.nos));
-  const totalManualAst = m1.providedAst + m2.providedAst;
-  const totalManualNos = num(manual1.nos) + num(manual2.nos);
-  const manualSpacing = totalManualNos > 1 
-    ? (num(breadth) - (2 * num(cover)) - (num(manual1.nos) * manual1.dia + num(manual2.nos) * manual2.dia)) / (totalManualNos - 1) 
-    : 0;
-  const manualStatus = totalManualAst >= num(reqAst) && manualSpacing >= 25;
-
   return (
-    <div className="min-h-screen bg-white font-sans text-black pb-10">
-      {/* Header - Matching Doubly Reinforced Style */}
-      <div className="bg-[#92d050] p-4 text-center border-b-2 border-[#76b041] shadow-sm">
-        <h1 className="text-lg font-black uppercase tracking-tight">AST TOOL — BEAM</h1>
+    <div className="min-h-screen bg-gray-100 font-sans text-black selection:bg-blue-200">
+      {/* Header */}
+      <div className="bg-[#92d050] p-5 text-center border-b-4 border-[#76b041] sticky top-0 z-50">
+        <h1 className="text-2xl font-black tracking-tighter text-gray-900">AST TOOL — BEAM</h1>
       </div>
 
-      <div className="p-3 max-w-lg mx-auto space-y-4">
+      <div className="max-w-md mx-auto p-4 space-y-4">
         
-        {/* Input Section - Color Coded per Reference */}
-        <div className="grid grid-cols-2 gap-3 bg-white p-3 border border-gray-300 rounded shadow-sm">
-          <div className="flex flex-col">
-            <label className="text-[10px] font-bold text-gray-600 mb-1">Breadth (b) mm</label>
-            <input 
-              type="text" inputMode="decimal" value={breadth} 
-              onChange={(e) => setBreadth(e.target.value)}
-              className="p-2 border border-black font-bold text-center bg-[#ffff00]" // Yellow Input
-            />
+        {/* Input Grid */}
+        <div className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+          <div className="grid grid-cols-2 border-b-2 border-black">
+            <div className="p-3 border-r-2 border-black">
+              <label className="text-[10px] font-black uppercase">Breadth (b) mm</label>
+              <input name="breadth" type="number" value={inputs.breadth} onChange={handleChange} className="w-full text-xl font-bold bg-[#ffff00] border border-gray-400 p-1 text-center outline-none" />
+            </div>
+            <div className="p-3">
+              <label className="text-[10px] font-black uppercase text-blue-700">Overall Depth (D) mm</label>
+              <input name="overallDepth" type="number" value={inputs.overallDepth} onChange={handleChange} className="w-full text-xl font-bold bg-[#ffff00] border border-gray-400 p-1 text-center outline-none" />
+            </div>
           </div>
-          <div className="flex flex-col">
-            <label className="text-[10px] font-bold text-gray-600 mb-1">Eff. depth (d) mm</label>
-            <input 
-              type="text" inputMode="decimal" value={effDepth} 
-              onChange={(e) => setEffDepth(e.target.value)}
-              className="p-2 border border-black font-bold text-center bg-[#ffff00]" // Yellow Input
-            />
+          
+          <div className="grid grid-cols-2 bg-gray-50 border-b-2 border-black">
+             <div className="p-2 border-r-2 border-black text-center">
+                <span className="text-[9px] font-bold block">EFFECTIVE DEPTH (d)</span>
+                <span className="text-lg font-black">{calc.effectiveD.toFixed(0)} mm</span>
+             </div>
+             <div className="p-2 text-center">
+                <span className="text-[9px] font-bold block">MAIN BAR Ø</span>
+                <select name="mainDia" value={inputs.mainDia} onChange={handleChange} className="font-bold bg-white border border-black px-2">
+                  {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
+                </select>
+             </div>
           </div>
-          <div className="flex flex-col col-span-2">
-            <label className="text-[10px] font-bold text-gray-600 mb-1 uppercase">Ast Required (mm²)</label>
-            <input 
-              type="text" inputMode="decimal" value={reqAst} 
-              onChange={(e) => setReqAst(e.target.value)}
-              className="p-3 border border-black font-black text-center text-xl bg-[#4472c4] text-white" // Blue Req Ast
-            />
+
+          <div className="p-4 bg-[#4472c4]">
+            <label className="text-white text-[10px] font-black block text-center mb-1">AST REQUIRED (MM²)</label>
+            <input name="reqAst" type="text" value={inputs.reqAst} onChange={handleChange} className="w-full text-3xl font-black text-center bg-[#4472c4] text-white outline-none" />
           </div>
         </div>
 
-        {/* Auto Solutions with Reference Colors */}
-        <div className="space-y-1">
-           {/* Table Header */}
-           <div className="grid grid-cols-6 gap-0 text-[9px] font-black text-center uppercase bg-gray-100 border border-gray-300">
-              <div className="p-1 border-r">Dia</div>
-              <div className="p-1 border-r">Nos</div>
-              <div className="p-1 border-r">Ast</div>
-              <div className="p-1 border-r">Pt%</div>
-              <div className="p-1 border-r">Space</div>
-              <div className="p-1">Status</div>
-           </div>
-
+        {/* Results Table */}
+        <div className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden text-[11px]">
+          <div className="grid grid-cols-6 bg-gray-800 text-white font-bold text-center py-2 uppercase tracking-tighter">
+            <div>Dia</div><div>Nos</div><div>Ast</div><div>Pt%</div><div>Space</div><div>Status</div>
+          </div>
           {diameters.map(dia => {
-            const data = calculateRow(dia);
+            const d = calc.getRowData(dia);
             return (
-              <div key={dia} className="grid grid-cols-6 border-x border-b border-gray-300 font-bold text-[11px] items-center text-center">
-                <div className={`${data.isOk ? 'bg-[#92d050]' : 'bg-red-600 text-white'} p-2 border-r border-gray-300`}>{dia}</div>
-                <div className={`${data.isOk ? 'bg-[#92d050]' : 'bg-red-600 text-white'} p-2 border-r border-gray-300`}>{data.nos}</div>
-                <div className="bg-[#ffcc00] p-2 border-r border-gray-300">{data.providedAst.toFixed(1)}</div>
-                <div className="bg-[#ffcc00] p-2 border-r border-gray-300">{data.pt.toFixed(2)}</div>
-                <div className="bg-[#ffcc00] p-2 border-r border-gray-300">{data.spacing.toFixed(0)}</div>
-                <div className={`${data.isOk ? 'bg-[#92d050]' : 'bg-red-600 text-white'} p-2 uppercase`}>
-                  {data.isOk ? 'OK' : 'FAIL'}
-                </div>
+              <div key={dia} className="grid grid-cols-6 text-center border-t border-gray-300 font-bold h-10 items-center">
+                <div className={`h-full flex items-center justify-center border-r ${d.isOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>{dia}</div>
+                <div className={`h-full flex items-center justify-center border-r ${d.isOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>{d.nos}</div>
+                <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r">{d.provAst.toFixed(1)}</div>
+                <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r">{d.pt.toFixed(2)}</div>
+                <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r">{d.space.toFixed(0)}</div>
+                <div className={`h-full flex items-center justify-center ${d.isOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>{d.isOk ? 'OK' : 'FAIL'}</div>
               </div>
             );
           })}
         </div>
 
-        {/* Manual Selection Section - Mixed Bars */}
-        <div className="border-2 border-black rounded overflow-hidden">
-          <div className="bg-[#4472c4] text-white p-2 text-[10px] font-black uppercase text-center">
-            Enter Provided Value (Mixed Bars)
-          </div>
-          <div className="p-2 bg-white space-y-2">
-            {[ {s: manual1, set: setManual1}, {s: manual2, set: setManual2} ].map((item, i) => (
+        {/* Mixed Bar Entry */}
+        <div className="bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <div className="bg-[#4472c4] text-white text-[10px] font-black p-2 text-center uppercase">Enter Provided Value (Mixed Bars)</div>
+          <div className="p-3 space-y-2">
+            {[ {v: manual1, s: setManual1}, {v: manual2, s: setManual2} ].map((row, i) => (
               <div key={i} className="flex gap-2">
-                <select 
-                  value={item.s.dia} 
-                  onChange={(e) => item.set({...item.s, dia: Number(e.target.value)})}
-                  className="flex-1 bg-[#ffff00] p-2 border border-black font-bold text-sm"
-                >
+                <select value={row.v.dia} onChange={(e) => row.s({...row.v, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] border-2 border-black font-bold p-2">
                   {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
                 </select>
-                <input 
-                  type="text" inputMode="numeric" value={item.s.nos} 
-                  onChange={(e) => item.set({...item.s, nos: e.target.value})}
-                  className="w-20 bg-white p-2 border border-black font-bold text-center"
-                  placeholder="Nos"
-                />
+                <input type="number" value={row.v.nos} onChange={(e) => row.s({...row.v, nos: e.target.value})} className="w-24 border-2 border-black p-2 text-center font-bold" placeholder="Nos" />
               </div>
             ))}
           </div>
-          
-          {/* Final Design Status - Color Matching Excel Bottom Row */}
-          <div className={`p-3 flex justify-between items-center ${manualStatus ? 'bg-[#92d050]' : 'bg-red-600 text-white'}`}>
-            <div className="text-left">
-              <div className="text-[10px] font-black uppercase opacity-80">Total Provided</div>
-              <div className="text-lg font-black">{totalManualAst.toFixed(2)} <small className="text-[10px]">mm²</small></div>
+
+          <div className={`p-4 flex justify-between items-center border-t-2 border-black transition-colors duration-300 ${designOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>
+            <div className="leading-tight">
+              <span className="text-[9px] font-black uppercase block">Total Provided</span>
+              <span className="text-xl font-black">{totalProvAst.toFixed(2)} <small className="text-xs">mm²</small></span>
             </div>
-            <div className="text-right">
-              <div className="text-[10px] font-black uppercase opacity-80">Spacing</div>
-              <div className="text-lg font-black">{manualSpacing.toFixed(1)} <small className="text-[10px]">mm</small></div>
+            <div className="text-center leading-tight">
+              <span className="text-[9px] font-black uppercase block">Spacing</span>
+              <span className="text-xl font-black">{mixedSpace.toFixed(1)} <small className="text-xs">mm</small></span>
             </div>
-            <div className="font-black text-xl ml-4">
-              {manualStatus ? '✓ OK' : '✕ FAIL'}
-            </div>
+            <div className="text-2xl font-black italic">{designOk ? '✓ OK' : '✕ FAIL'}</div>
           </div>
         </div>
 
-        <button 
-          className="w-full p-4 bg-black text-white font-bold rounded shadow-lg uppercase text-xs tracking-widest active:scale-95 transition-transform"
-          onClick={() => window.print()}
-        >
+        <button onClick={() => window.print()} className="w-full bg-white border-2 border-black p-4 font-black uppercase tracking-widest shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all">
           Print Design Report
         </button>
-
+        
       </div>
     </div>
   );
