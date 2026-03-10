@@ -68,113 +68,113 @@ const AstTool = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans flex flex-col selection:bg-blue-100 printable-content">
+    /* flex items-center justify-center centers the tool in the middle of the screen */
+    <div className="min-h-screen bg-white font-sans flex items-center justify-center p-2 selection:bg-blue-100">
       <style>{`
         @media print {
-          @page { size: portrait; margin: 10mm; }
-          body { -webkit-print-color-adjust: exact; }
+          @page { size: portrait; margin: 5mm; }
+          body { -webkit-print-color-adjust: exact; background: white; }
           .no-print { display: none !important; }
-          .printable-content { height: 100vh; overflow: hidden; justify-content: flex-start; gap: 10px; }
+          .printable-content { height: auto; width: 100%; position: static; margin: 0; padding: 0; }
           input, select { border: none !important; -webkit-appearance: none; appearance: none; }
         }
       `}</style>
 
-      {/* Header - Renamed */}
-      <div className="bg-[#92d050] py-4 text-center border-b border-black/5">
-        <h1 className="text-3xl font-black uppercase tracking-tighter">AST TOOL (BEAM)</h1>
-      </div>
-
-      <div className="flex-1 flex flex-col p-3 space-y-3 max-w-md mx-auto w-full">
+      <div className="printable-content flex flex-col space-y-2 max-w-md w-full border border-gray-100 shadow-xl rounded-lg overflow-hidden">
         
-        {/* Dimensions */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="flex flex-col">
-            <label className="text-[10px] font-black uppercase text-gray-500 mb-1">Breadth (b) mm</label>
-            <input name="breadth" type="number" value={inputs.breadth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/10" />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-[10px] font-black uppercase text-gray-500 mb-1">Overall Depth (D) mm</label>
-            <input name="overallDepth" type="number" value={inputs.overallDepth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/10" />
-          </div>
+        {/* Header */}
+        <div className="bg-[#92d050] py-4 text-center border-b border-black/5">
+          <h1 className="text-3xl font-black uppercase tracking-tighter">AST TOOL (BEAM)</h1>
         </div>
 
-        {/* Info & Clear Row */}
-        <div className="grid grid-cols-3 bg-[#ffff00]/30 border border-black/10 rounded-sm overflow-hidden h-14">
-          <div className="flex flex-col items-center justify-center border-r border-black/10">
-            <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Eff. Depth (d)</span>
-            <span className="text-lg font-black">{calc.effectiveD.toFixed(0)} mm</span>
+        <div className="p-3 space-y-3">
+          {/* Dimensions */}
+          <div className="grid grid-cols-2 gap-1 text-[10px] font-black uppercase text-gray-600">
+             <span>Breadth (b) mm</span>
+             <span>Overall Depth (D) mm</span>
           </div>
-          <div className="flex flex-col items-center justify-center border-r border-black/10">
-            <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Main Bar Ø</span>
-            <select name="mainDia" value={inputs.mainDia} onChange={handleChange} className="text-lg font-black bg-transparent outline-none">
-              {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
-            </select>
+          <div className="grid grid-cols-2 gap-2">
+            <input name="breadth" type="number" value={inputs.breadth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
+            <input name="overallDepth" type="number" value={inputs.overallDepth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
           </div>
-          <button onClick={clearAll} className="no-print bg-red-600 text-white font-black uppercase text-[11px] h-full flex items-center justify-center active:bg-red-700">
-            Clear All
-          </button>
-        </div>
 
-        {/* Ast Required */}
-        <div className="bg-[#4472c4] p-3 text-center rounded-sm shadow-md">
-          <label className="text-white text-[11px] font-black uppercase block mb-1">Ast Required (mm²)</label>
-          <input name="reqAst" type="number" value={inputs.reqAst} onChange={handleChange} className="w-full bg-[#ffff00] text-center text-4xl font-black py-1 rounded-sm outline-none border border-black/20" />
-        </div>
-
-        {/* Results Table */}
-        <div className="rounded-sm border border-black/10 overflow-hidden shadow-sm">
-          <div className="grid grid-cols-6 bg-gray-900 text-white text-[9px] font-black text-center py-2 uppercase">
-            <div>Dia</div><div>Nos</div><div>Ast</div><div>Pt%</div><div>Space</div><div>Status</div>
+          {/* Info & Clear Row */}
+          <div className="grid grid-cols-3 bg-[#ffff00]/30 border border-black/10 rounded-sm overflow-hidden h-14">
+            <div className="flex flex-col items-center justify-center border-r border-black/10">
+              <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Eff. Depth (d)</span>
+              <span className="text-lg font-black">{calc.effectiveD.toFixed(0)} mm</span>
+            </div>
+            <div className="flex flex-col items-center justify-center border-r border-black/10">
+              <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Main Bar Ø</span>
+              <select name="mainDia" value={inputs.mainDia} onChange={handleChange} className="text-lg font-black bg-transparent outline-none">
+                {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
+              </select>
+            </div>
+            <button onClick={clearAll} className="no-print bg-gray-200 text-black font-black uppercase text-[10px] h-full flex items-center justify-center active:bg-gray-300">
+              CLEAR ALL
+            </button>
           </div>
-          {diameters.map(dia => {
-            const d = calc.getRowData(dia);
-            return (
-              <div key={dia} className="grid grid-cols-6 text-center text-[11px] font-bold h-10 items-center border-b border-gray-100 last:border-0">
-                <div className={`h-full flex items-center justify-center border-r border-gray-50 ${d.isOk ? 'bg-white' : 'bg-[#ff0000] text-white'}`}>{dia}</div>
-                <div className={`h-full flex items-center justify-center border-r border-gray-50 ${d.isOk ? 'bg-white' : 'bg-[#ff0000] text-white'}`}>{d.nos}</div>
-                <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.provAst.toFixed(0)}</div>
-                <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.pt.toFixed(2)}</div>
-                <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.space.toFixed(0)}</div>
-                <div className={`h-full flex items-center justify-center font-black ${d.isOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>{d.isOk ? 'OK' : 'FAIL'}</div>
-              </div>
-            );
-          })}
-        </div>
 
-        {/* Provided Bars Mixed */}
-        <div className="rounded-sm overflow-hidden border-2 border-[#4472c4]">
-          <div className="bg-[#4472c4] text-white text-[10px] font-black py-2 text-center uppercase">Enter Provided Bars (Mixed)</div>
-          <div className="p-2 space-y-2 bg-gray-50">
-            {[ {v: manual1, s: setManual1}, {v: manual2, s: setManual2} ].map((row, i) => (
-              <div key={i} className="flex gap-2">
-                <select value={row.v.dia} onChange={(e) => row.s({...row.v, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] font-black p-2 rounded-sm outline-none border border-black/10 text-lg">
-                  {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
-                </select>
-                <input type="number" value={row.v.nos} onChange={(e) => row.s({...row.v, nos: e.target.value})} className="w-24 bg-white border border-gray-300 text-center font-black text-2xl rounded-sm" />
-              </div>
-            ))}
+          {/* Ast Required Section */}
+          <div className="bg-[#4472c4] p-3 text-center rounded-sm">
+            <label className="text-white text-[11px] font-black uppercase block mb-1">Ast Required (mm²)</label>
+            <input name="reqAst" type="number" value={inputs.reqAst} onChange={handleChange} className="w-full bg-[#ffff00] text-center text-3xl font-black py-1 rounded-sm outline-none" />
+          </div>
+
+          {/* Results Table */}
+          <div className="rounded-sm border border-black/10 overflow-hidden">
+            <div className="grid grid-cols-6 bg-gray-900 text-white text-[9px] font-black text-center py-2 uppercase">
+              <div>Dia</div><div>Nos</div><div>Ast</div><div>Pt%</div><div>Space</div><div>Status</div>
+            </div>
+            {diameters.map(dia => {
+              const d = calc.getRowData(dia);
+              return (
+                <div key={dia} className="grid grid-cols-6 text-center text-[11px] font-bold h-10 items-center border-b border-gray-100 last:border-0">
+                  <div className={`h-full flex items-center justify-center border-r border-gray-50 ${d.isOk ? 'bg-white' : 'bg-[#ff0000] text-white'}`}>{dia}</div>
+                  <div className={`h-full flex items-center justify-center border-r border-gray-50 ${d.isOk ? 'bg-white' : 'bg-[#ff0000] text-white'}`}>{d.nos}</div>
+                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.provAst.toFixed(0)}</div>
+                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.pt.toFixed(2)}</div>
+                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.space.toFixed(0)}</div>
+                  <div className={`h-full flex items-center justify-center font-black ${d.isOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>{d.isOk ? 'OK' : 'FAIL'}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Mixed Bar Entry */}
+          <div className="rounded-sm overflow-hidden border-2 border-[#4472c4]">
+            <div className="bg-[#4472c4] text-white text-[10px] font-black py-2 text-center uppercase tracking-widest">Enter Provided Bars (Mixed)</div>
+            <div className="p-2 space-y-2 bg-gray-50">
+              {[ {v: manual1, s: setManual1}, {v: manual2, s: setManual2} ].map((row, i) => (
+                <div key={i} className="flex gap-2">
+                  <select value={row.v.dia} onChange={(e) => row.s({...row.v, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] font-black p-2 rounded-sm outline-none border border-black/10 text-lg">
+                    {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
+                  </select>
+                  <input type="number" value={row.v.nos} onChange={(e) => row.s({...row.v, nos: e.target.value})} className="w-24 bg-white border border-gray-300 text-center font-black text-2xl rounded-sm shadow-inner" placeholder="Nos" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Status Bar */}
+          <div className={`p-4 flex justify-between items-center rounded-sm transition-all duration-300 ${designOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>
+            <div className="leading-tight">
+              <span className="text-[10px] font-black uppercase block opacity-80">Prov. Ast</span>
+              <span className="text-2xl font-black">{totalProvAst.toFixed(1)} <small className="text-xs">mm²</small></span>
+            </div>
+            <div className="text-center leading-tight">
+              <span className="text-[10px] font-black uppercase block opacity-80">Spacing</span>
+              <span className="text-2xl font-black">{mixedSpace.toFixed(0)} <small className="text-xs">mm</small></span>
+            </div>
+            <div className="text-3xl font-black italic tracking-tighter">{designOk ? '✓ OK' : '✕ FAIL'}</div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="no-print grid grid-cols-2 gap-2 pb-2">
+            <button onClick={copyToClipboard} className="bg-[#efefef] text-black py-3 font-black uppercase text-xs tracking-widest rounded-sm border border-gray-300 active:bg-gray-200">Copy Result</button>
+            <button onClick={() => window.print()} className="bg-[#efefef] text-black py-3 font-black uppercase text-xs tracking-widest rounded-sm border border-gray-300 active:bg-gray-200">Print / PDF</button>
           </div>
         </div>
-
-        {/* Final Status Bar */}
-        <div className={`p-4 flex justify-between items-center rounded-sm shadow-lg ${designOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>
-          <div className="leading-tight text-left">
-            <span className="text-[10px] font-black uppercase block opacity-80">Prov. Ast</span>
-            <span className="text-2xl font-black">{totalProvAst.toFixed(1)} <small className="text-xs font-bold">mm²</small></span>
-          </div>
-          <div className="text-center leading-tight">
-            <span className="text-[10px] font-black uppercase block opacity-80">Spacing</span>
-            <span className="text-2xl font-black">{mixedSpace.toFixed(0)} <small className="text-xs font-bold">mm</small></span>
-          </div>
-          <div className="text-4xl font-black italic tracking-tighter">{designOk ? '✓ OK' : '✕ FAIL'}</div>
-        </div>
-
-        {/* Buttons */}
-        <div className="no-print grid grid-cols-2 gap-2 pb-4">
-          <button onClick={copyToClipboard} className="bg-blue-600 text-white py-4 font-black uppercase text-xs tracking-widest rounded-sm active:scale-95 shadow-md">Copy Result</button>
-          <button onClick={() => window.print()} className="bg-black text-white py-4 font-black uppercase text-xs tracking-widest rounded-sm active:scale-95 shadow-md">Print / PDF</button>
-        </div>
-
       </div>
     </div>
   );
