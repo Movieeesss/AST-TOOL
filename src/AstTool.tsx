@@ -70,9 +70,14 @@ const AstTool = () => {
     alert("Report copied!");
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInputs(prev => ({ ...prev, [name]: value }));
+  };
+
   return (
-    <div className="min-h-screen bg-white font-sans flex items-center justify-center p-2 selection:bg-blue-100 relative">
-      <div className="flex flex-col space-y-2 max-w-md w-full border border-gray-100 shadow-xl rounded-lg overflow-hidden relative">
+    <div className="min-h-screen bg-white font-sans flex items-center justify-center p-2 selection:bg-blue-100">
+      <div className="flex flex-col space-y-2 max-w-md w-full border border-gray-100 shadow-xl rounded-lg overflow-hidden">
         
         {/* Header */}
         <div className="bg-[#92d050] py-4 text-center border-b border-black/5">
@@ -86,8 +91,8 @@ const AstTool = () => {
              <span>Overall Depth (D) mm</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <input type="number" value={inputs.breadth} onChange={(e) => setInputs({...inputs, breadth: e.target.value})} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
-            <input type="number" value={inputs.overallDepth} onChange={(e) => setInputs({...inputs, overallDepth: e.target.value})} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
+            <input name="breadth" type="number" value={inputs.breadth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
+            <input name="overallDepth" type="number" value={inputs.overallDepth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
           </div>
 
           <div className="grid grid-cols-2 bg-[#ffff00]/30 border border-black/10 rounded-sm overflow-hidden h-14">
@@ -97,7 +102,7 @@ const AstTool = () => {
             </div>
             <div className="flex flex-col items-center justify-center">
               <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Main Bar Ø</span>
-              <select value={inputs.mainDia} onChange={(e) => setInputs({...inputs, mainDia: e.target.value})} className="text-lg font-black bg-transparent outline-none">
+              <select name="mainDia" value={inputs.mainDia} onChange={handleChange} className="text-lg font-black bg-transparent outline-none">
                 {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
               </select>
             </div>
@@ -106,7 +111,7 @@ const AstTool = () => {
           {/* Ast Required Section */}
           <div className="bg-[#4472c4] p-3 text-center rounded-sm">
             <label className="text-white text-[11px] font-black uppercase block mb-1">Ast Required (mm²)</label>
-            <input type="number" value={inputs.reqAst} onChange={(e) => setInputs({...inputs, reqAst: e.target.value})} className="w-full bg-[#ffff00] text-center text-3xl font-black py-1 rounded-sm outline-none" />
+            <input name="reqAst" type="number" value={inputs.reqAst} onChange={handleChange} className="w-full bg-[#ffff00] text-center text-3xl font-black py-1 rounded-sm outline-none" />
           </div>
 
           {/* Results Table */}
@@ -166,24 +171,15 @@ const AstTool = () => {
             <button onClick={copyToClipboard} className="w-full bg-[#efefef] text-black py-4 font-black uppercase text-xs tracking-widest rounded-sm border border-gray-300 active:bg-gray-200 shadow-md">
               Copy Result
             </button>
+            <button onClick={sendWhatsApp} className="w-full bg-[#25D366] text-white py-4 font-black uppercase text-xs tracking-widest rounded-sm active:bg-[#128C7E] shadow-md flex items-center justify-center gap-2">
+              Share to WhatsApp
+            </button>
             <button onClick={clearAll} className="w-full bg-red-600 text-white py-4 font-black uppercase text-xs tracking-widest rounded-sm active:bg-red-700 shadow-md">
               Clear All
             </button>
           </div>
         </div>
       </div>
-
-      {/* Floating WhatsApp Button - Fixed Position */}
-      <button 
-        onClick={sendWhatsApp}
-        className="fixed bottom-6 right-6 bg-[#25D366] text-white p-3 rounded-full shadow-2xl active:scale-90 transition-transform flex items-center justify-center border-2 border-white"
-        style={{ zIndex: 9999, width: '60px', height: '60px' }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.06 3.973L0 16l4.104-1.076a7.858 7.858 0 0 0 3.888 1.029h.001c4.368 0 7.926-3.558 7.93-7.93a7.856 7.856 0 0 0-2.331-5.669zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
-        </svg>
-      </button>
-
     </div>
   );
 };
