@@ -9,9 +9,14 @@ const AstTool = () => {
     mainDia: '16'
   };
 
+  const initialManual = {
+    m1: { dia: 16, nos: '2' },
+    m2: { dia: 12, nos: '1' }
+  };
+
   const [inputs, setInputs] = useState(initialInputs);
-  const [manual1, setManual1] = useState({ dia: 16, nos: '2' });
-  const [manual2, setManual2] = useState({ dia: 12, nos: '1' });
+  const [manual1, setManual1] = useState(initialManual.m1);
+  const [manual2, setManual2] = useState(initialManual.m2);
 
   const diameters = [10, 12, 16, 20, 25];
 
@@ -51,169 +56,113 @@ const AstTool = () => {
     : 0;
   const designOk = totalProvAst >= calc.targetAst && (totalNos <= 1 || mixedSpace >= 25);
 
-  const handlePrint = () => {
-    window.print();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInputs(prev => ({ ...prev, [name]: value }));
   };
 
   const copyToClipboard = () => {
-    const text = `*AST TOOL (BEAM) REPORT*\nSize: ${inputs.breadth}x${inputs.overallDepth}mm\nReq Ast: ${inputs.reqAst}mm²\nProv: ${totalProvAst.toFixed(1)}mm²\nStatus: ${designOk ? 'OK' : 'FAIL'}`;
+    const text = `*AST TOOL (BEAM) REPORT*\nSize: ${inputs.breadth}x${inputs.overallDepth}\nReq Ast: ${inputs.reqAst}\nProv: ${totalProvAst.toFixed(2)}mm²\nStatus: ${designOk ? 'OK' : 'FAIL'}`;
     navigator.clipboard.writeText(text);
-    alert("Report Copied!");
+    alert("Report copied!");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-2 font-sans">
-      <style>{`
-        @media print {
-          @page { size: portrait; margin: 0.5cm; }
-          body { background: white !important; margin: 0; padding: 0; }
-          .no-print { display: none !important; }
-          .print-area { 
-            width: 100% !important; 
-            max-width: 100% !important; 
-            border: none !important; 
-            box-shadow: none !important;
-            transform: scale(0.95);
-            transform-origin: top center;
-          }
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          input, select { border: none !important; background: transparent !important; appearance: none; -webkit-appearance: none; }
-        }
-      `}</style>
-
-      <div className="print-area flex flex-col bg-white max-w-md w-full shadow-2xl rounded-xl overflow-hidden border border-gray-200">
+    <div className="min-h-screen bg-white font-sans flex items-center justify-center p-2 selection:bg-blue-100">
+      <div className="flex flex-col space-y-2 max-w-md w-full border border-gray-100 shadow-xl rounded-lg overflow-hidden">
         
         {/* Header */}
-        <div className="bg-[#92d050] py-5 text-center border-b-2 border-black/10">
-          <h1 className="text-3xl font-black uppercase tracking-tighter text-black">AST TOOL (BEAM)</h1>
+        <div className="bg-[#92d050] py-4 text-center border-b border-black/5">
+          <h1 className="text-3xl font-black uppercase tracking-tighter">AST TOOL (BEAM)</h1>
         </div>
 
-        <div className="p-4 space-y-4">
-          {/* Dimensions Inputs */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col">
-              <label className="text-[10px] font-black uppercase text-gray-400 mb-1">Breadth (b) mm</label>
-              <input 
-                type="number" value={inputs.breadth} 
-                onChange={(e) => setInputs({...inputs, breadth: e.target.value})} 
-                className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-md outline-none border-b-2 border-black/10" 
-              />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-[10px] font-black uppercase text-gray-400 mb-1">Overall Depth (D) mm</label>
-              <input 
-                type="number" value={inputs.overallDepth} 
-                onChange={(e) => setInputs({...inputs, overallDepth: e.target.value})} 
-                className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-md outline-none border-b-2 border-black/10" 
-              />
-            </div>
+        <div className="p-3 space-y-3">
+          {/* Dimensions */}
+          <div className="grid grid-cols-2 gap-1 text-[10px] font-black uppercase text-gray-600">
+             <span>Breadth (b) mm</span>
+             <span>Overall Depth (D) mm</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <input name="breadth" type="number" value={inputs.breadth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
+            <input name="overallDepth" type="number" value={inputs.overallDepth} onChange={handleChange} className="bg-[#ffff00] text-center text-2xl font-black py-2 rounded-sm outline-none border border-black/5" />
           </div>
 
           {/* Info & Clear Row */}
-          <div className="grid grid-cols-3 bg-[#ffff00]/20 rounded-md overflow-hidden border border-gray-200">
-            <div className="py-2 text-center border-r border-gray-200">
-              <span className="block text-[9px] font-black opacity-50 uppercase">Eff. Depth (d)</span>
+          <div className="grid grid-cols-3 bg-[#ffff00]/30 border border-black/10 rounded-sm overflow-hidden h-14">
+            <div className="flex flex-col items-center justify-center border-r border-black/10">
+              <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Eff. Depth (d)</span>
               <span className="text-lg font-black">{calc.effectiveD.toFixed(0)} mm</span>
             </div>
-            <div className="py-2 text-center border-r border-gray-200">
-              <span className="block text-[9px] font-black opacity-50 uppercase">Main Bar Ø</span>
-              <select 
-                value={inputs.mainDia} 
-                onChange={(e) => setInputs({...inputs, mainDia: e.target.value})} 
-                className="text-lg font-black bg-transparent outline-none cursor-pointer"
-              >
+            <div className="flex flex-col items-center justify-center border-r border-black/10">
+              <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Main Bar Ø</span>
+              <select name="mainDia" value={inputs.mainDia} onChange={handleChange} className="text-lg font-black bg-transparent outline-none">
                 {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
               </select>
             </div>
-            <button onClick={clearAll} className="no-print bg-red-600 text-white font-black text-[10px] uppercase active:bg-red-700">
-              Clear All
+            <button onClick={clearAll} className="bg-gray-200 text-black font-black uppercase text-[10px] h-full flex items-center justify-center active:bg-gray-300">
+              CLEAR ALL
             </button>
           </div>
 
-          {/* Ast Required Display */}
-          <div className="bg-[#4472c4] p-4 rounded-md shadow-lg text-center">
-            <label className="text-white text-[11px] font-black uppercase block mb-1 tracking-widest">Ast Required (mm²)</label>
-            <input 
-              type="number" value={inputs.reqAst} 
-              onChange={(e) => setInputs({...inputs, reqAst: e.target.value})} 
-              className="w-full bg-[#ffff00] text-center text-4xl font-black py-1 rounded-sm outline-none border-none" 
-            />
+          {/* Ast Required Section */}
+          <div className="bg-[#4472c4] p-3 text-center rounded-sm">
+            <label className="text-white text-[11px] font-black uppercase block mb-1">Ast Required (mm²)</label>
+            <input name="reqAst" type="number" value={inputs.reqAst} onChange={handleChange} className="w-full bg-[#ffff00] text-center text-3xl font-black py-1 rounded-sm outline-none" />
           </div>
 
-          {/* Automatic Table */}
-          <div className="rounded-md border border-gray-200 overflow-hidden shadow-sm">
-            <div className="grid grid-cols-6 bg-gray-900 text-white text-[9px] font-black py-2 text-center uppercase">
+          {/* Results Table */}
+          <div className="rounded-sm border border-black/10 overflow-hidden">
+            <div className="grid grid-cols-6 bg-gray-900 text-white text-[9px] font-black text-center py-2 uppercase">
               <div>Dia</div><div>Nos</div><div>Ast</div><div>Pt%</div><div>Space</div><div>Status</div>
             </div>
             {diameters.map(dia => {
               const d = calc.getRowData(dia);
               return (
                 <div key={dia} className="grid grid-cols-6 text-center text-[11px] font-bold h-10 items-center border-b border-gray-100 last:border-0">
-                  <div className={`h-full flex items-center justify-center border-r border-gray-100 ${d.isOk ? 'bg-white' : 'bg-red-600 text-white'}`}>{dia}</div>
-                  <div className={`h-full flex items-center justify-center border-r border-gray-100 ${d.isOk ? 'bg-white' : 'bg-red-600 text-white'}`}>{d.nos}</div>
-                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/50">{d.provAst.toFixed(0)}</div>
-                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/50">{d.pt.toFixed(2)}</div>
-                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/50">{d.space.toFixed(0)}</div>
-                  <div className={`h-full flex items-center justify-center font-black ${d.isOk ? 'bg-[#92d050]' : 'bg-red-600 text-white'}`}>{d.isOk ? 'OK' : 'FAIL'}</div>
+                  <div className={`h-full flex items-center justify-center border-r border-gray-50 ${d.isOk ? 'bg-white' : 'bg-[#ff0000] text-white'}`}>{dia}</div>
+                  <div className={`h-full flex items-center justify-center border-r border-gray-50 ${d.isOk ? 'bg-white' : 'bg-[#ff0000] text-white'}`}>{d.nos}</div>
+                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.provAst.toFixed(0)}</div>
+                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.pt.toFixed(2)}</div>
+                  <div className="bg-[#ffcc00] h-full flex items-center justify-center border-r border-white/40">{d.space.toFixed(0)}</div>
+                  <div className={`h-full flex items-center justify-center font-black ${d.isOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>{d.isOk ? 'OK' : 'FAIL'}</div>
                 </div>
               );
             })}
           </div>
 
-          {/* Manual Entry Section */}
-          <div className="rounded-md border-2 border-[#4472c4] overflow-hidden">
-            <div className="bg-[#4472c4] text-white text-[10px] font-black py-2 text-center uppercase">Enter Provided Bars (Mixed)</div>
-            <div className="p-2 space-y-2 bg-white">
-              <div className="flex gap-2">
-                <select 
-                  value={manual1.dia} 
-                  onChange={(e) => setManual1({...manual1, dia: Number(e.target.value)})} 
-                  className="flex-1 bg-[#ffff00] font-black p-3 rounded-md border border-black/10 text-lg"
-                >
-                  {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
-                </select>
-                <input 
-                  type="number" value={manual1.nos} 
-                  onChange={(e) => setManual1({...manual1, nos: e.target.value})} 
-                  className="w-24 border border-gray-300 text-center font-black text-2xl rounded-md" 
-                  placeholder="Nos" 
-                />
-              </div>
-              <div className="flex gap-2">
-                <select 
-                  value={manual2.dia} 
-                  onChange={(e) => setManual2({...manual2, dia: Number(e.target.value)})} 
-                  className="flex-1 bg-[#ffff00] font-black p-3 rounded-md border border-black/10 text-lg"
-                >
-                  {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
-                </select>
-                <input 
-                  type="number" value={manual2.nos} 
-                  onChange={(e) => setManual2({...manual2, nos: e.target.value})} 
-                  className="w-24 border border-gray-300 text-center font-black text-2xl rounded-md" 
-                  placeholder="Nos" 
-                />
-              </div>
+          {/* Mixed Bar Entry */}
+          <div className="rounded-sm overflow-hidden border-2 border-[#4472c4]">
+            <div className="bg-[#4472c4] text-white text-[10px] font-black py-2 text-center uppercase tracking-widest">Enter Provided Bars (Mixed)</div>
+            <div className="p-2 space-y-2 bg-gray-50">
+              {[ {v: manual1, s: setManual1}, {v: manual2, s: setManual2} ].map((row, i) => (
+                <div key={i} className="flex gap-2">
+                  <select value={row.v.dia} onChange={(e) => row.s({...row.v, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] font-black p-2 rounded-sm outline-none border border-black/10 text-lg">
+                    {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
+                  </select>
+                  <input type="number" value={row.v.nos} onChange={(e) => row.s({...row.v, nos: e.target.value})} className="w-24 bg-white border border-gray-300 text-center font-black text-2xl rounded-sm shadow-inner" placeholder="Nos" />
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Result Status Bar */}
-          <div className={`p-4 flex justify-between items-center rounded-md shadow-inner transition-colors ${designOk ? 'bg-[#92d050]' : 'bg-red-600 text-white'}`}>
-            <div className="text-left">
-              <span className="text-[10px] font-black uppercase block opacity-70">Provided Ast</span>
+          {/* Status Bar */}
+          <div className={`p-4 flex justify-between items-center rounded-sm transition-all duration-300 ${designOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>
+            <div className="leading-tight">
+              <span className="text-[10px] font-black uppercase block opacity-80">Prov. Ast</span>
               <span className="text-2xl font-black">{totalProvAst.toFixed(1)} <small className="text-xs">mm²</small></span>
             </div>
-            <div className="text-center">
-              <span className="text-[10px] font-black uppercase block opacity-70">Spacing</span>
+            <div className="text-center leading-tight">
+              <span className="text-[10px] font-black uppercase block opacity-80">Spacing</span>
               <span className="text-2xl font-black">{mixedSpace.toFixed(0)} <small className="text-xs">mm</small></span>
             </div>
-            <div className="text-4xl font-black italic tracking-tighter">{designOk ? '✓ OK' : '✕ FAIL'}</div>
+            <div className="text-3xl font-black italic tracking-tighter">{designOk ? '✓ OK' : '✕ FAIL'}</div>
           </div>
 
           {/* Action Buttons */}
-          <div className="no-print grid grid-cols-2 gap-3 pb-2">
-            <button onClick={copyToClipboard} className="bg-blue-600 text-white py-4 font-black uppercase text-xs rounded-md shadow-md active:scale-95 transition-all">Copy Result</button>
-            <button onClick={handlePrint} className="bg-black text-white py-4 font-black uppercase text-xs rounded-md shadow-md active:scale-95 transition-all">Print / PDF</button>
+          <div className="pb-2">
+            <button onClick={copyToClipboard} className="w-full bg-[#efefef] text-black py-4 font-black uppercase text-xs tracking-widest rounded-sm border border-gray-300 active:bg-gray-200 shadow-md">
+              Copy Result
+            </button>
           </div>
         </div>
       </div>
