@@ -62,21 +62,31 @@ const AstTool = () => {
   };
 
   const copyToClipboard = () => {
-    const text = `*AST REPORT*\nSize: ${inputs.breadth}x${inputs.overallDepth}\nReq Ast: ${inputs.reqAst}\nProv: ${totalProvAst.toFixed(2)}mm²\nStatus: ${designOk ? 'OK' : 'FAIL'}`;
+    const text = `*AST TOOL (BEAM) REPORT*\nSize: ${inputs.breadth}x${inputs.overallDepth}\nReq Ast: ${inputs.reqAst}\nProv: ${totalProvAst.toFixed(2)}mm²\nStatus: ${designOk ? 'OK' : 'FAIL'}`;
     navigator.clipboard.writeText(text);
     alert("Report copied!");
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans flex flex-col selection:bg-blue-100">
-      {/* Header */}
+    <div className="min-h-screen bg-white font-sans flex flex-col selection:bg-blue-100 printable-content">
+      <style>{`
+        @media print {
+          @page { size: portrait; margin: 10mm; }
+          body { -webkit-print-color-adjust: exact; }
+          .no-print { display: none !important; }
+          .printable-content { height: 100vh; overflow: hidden; justify-content: flex-start; gap: 10px; }
+          input, select { border: none !important; -webkit-appearance: none; appearance: none; }
+        }
+      `}</style>
+
+      {/* Header - Renamed */}
       <div className="bg-[#92d050] py-4 text-center border-b border-black/5">
-        <h1 className="text-3xl font-black uppercase tracking-tighter">AST TOOL — BEAM</h1>
+        <h1 className="text-3xl font-black uppercase tracking-tighter">AST TOOL (BEAM)</h1>
       </div>
 
-      <div className="flex-1 flex flex-col p-3 space-y-4 max-w-md mx-auto w-full">
+      <div className="flex-1 flex flex-col p-3 space-y-3 max-w-md mx-auto w-full">
         
-        {/* Dimensions - Yellow Inputs */}
+        {/* Dimensions */}
         <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col">
             <label className="text-[10px] font-black uppercase text-gray-500 mb-1">Breadth (b) mm</label>
@@ -88,7 +98,7 @@ const AstTool = () => {
           </div>
         </div>
 
-        {/* Info Row + Clear Button Row */}
+        {/* Info & Clear Row */}
         <div className="grid grid-cols-3 bg-[#ffff00]/30 border border-black/10 rounded-sm overflow-hidden h-14">
           <div className="flex flex-col items-center justify-center border-r border-black/10">
             <span className="text-[9px] font-black opacity-60 uppercase tracking-tighter">Eff. Depth (d)</span>
@@ -100,18 +110,18 @@ const AstTool = () => {
               {diameters.map(d => <option key={d} value={d}>{d}mm</option>)}
             </select>
           </div>
-          <button onClick={clearAll} className="bg-red-600 text-white font-black uppercase text-[11px] h-full flex items-center justify-center active:bg-red-700">
+          <button onClick={clearAll} className="no-print bg-red-600 text-white font-black uppercase text-[11px] h-full flex items-center justify-center active:bg-red-700">
             Clear All
           </button>
         </div>
 
-        {/* AST REQUIRED SECTION */}
+        {/* Ast Required */}
         <div className="bg-[#4472c4] p-3 text-center rounded-sm shadow-md">
-          <label className="text-white text-[11px] font-black uppercase block mb-1 tracking-widest">Ast Required (mm²)</label>
+          <label className="text-white text-[11px] font-black uppercase block mb-1">Ast Required (mm²)</label>
           <input name="reqAst" type="number" value={inputs.reqAst} onChange={handleChange} className="w-full bg-[#ffff00] text-center text-4xl font-black py-1 rounded-sm outline-none border border-black/20" />
         </div>
 
-        {/* Auto Results Table */}
+        {/* Results Table */}
         <div className="rounded-sm border border-black/10 overflow-hidden shadow-sm">
           <div className="grid grid-cols-6 bg-gray-900 text-white text-[9px] font-black text-center py-2 uppercase">
             <div>Dia</div><div>Nos</div><div>Ast</div><div>Pt%</div><div>Space</div><div>Status</div>
@@ -131,42 +141,39 @@ const AstTool = () => {
           })}
         </div>
 
-        {/* MOVED TO MIDDLE: Enter Provided Bars */}
+        {/* Provided Bars Mixed */}
         <div className="rounded-sm overflow-hidden border-2 border-[#4472c4]">
-          <div className="bg-[#4472c4] text-white text-[10px] font-black py-2 text-center uppercase tracking-widest">Enter Provided Bars (Mixed)</div>
+          <div className="bg-[#4472c4] text-white text-[10px] font-black py-2 text-center uppercase">Enter Provided Bars (Mixed)</div>
           <div className="p-2 space-y-2 bg-gray-50">
             {[ {v: manual1, s: setManual1}, {v: manual2, s: setManual2} ].map((row, i) => (
               <div key={i} className="flex gap-2">
-                <select value={row.v.dia} onChange={(e) => row.s({...row.v, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] font-black p-3 rounded-sm outline-none border border-black/10 text-lg">
+                <select value={row.v.dia} onChange={(e) => row.s({...row.v, dia: Number(e.target.value)})} className="flex-1 bg-[#ffff00] font-black p-2 rounded-sm outline-none border border-black/10 text-lg">
                   {diameters.map(d => <option key={d} value={d}>{d}mm Bar</option>)}
                 </select>
-                <input type="number" value={row.v.nos} onChange={(e) => row.s({...row.v, nos: e.target.value})} className="w-24 bg-white border border-gray-300 text-center font-black text-2xl rounded-sm" placeholder="Nos" />
+                <input type="number" value={row.v.nos} onChange={(e) => row.s({...row.v, nos: e.target.value})} className="w-24 bg-white border border-gray-300 text-center font-black text-2xl rounded-sm" />
               </div>
             ))}
           </div>
         </div>
 
-        {/* MOVED TO MIDDLE: Final Status Bar */}
-        <div className={`p-4 flex justify-between items-center rounded-sm shadow-lg transition-all duration-300 ${designOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>
-          <div className="leading-tight">
-            <span className="text-[10px] font-black uppercase block opacity-80">Provided Ast</span>
-            <span className="text-2xl font-black">{totalProvAst.toFixed(1)} <small className="text-xs">mm²</small></span>
+        {/* Final Status Bar */}
+        <div className={`p-4 flex justify-between items-center rounded-sm shadow-lg ${designOk ? 'bg-[#92d050]' : 'bg-[#ff0000] text-white'}`}>
+          <div className="leading-tight text-left">
+            <span className="text-[10px] font-black uppercase block opacity-80">Prov. Ast</span>
+            <span className="text-2xl font-black">{totalProvAst.toFixed(1)} <small className="text-xs font-bold">mm²</small></span>
           </div>
           <div className="text-center leading-tight">
             <span className="text-[10px] font-black uppercase block opacity-80">Spacing</span>
-            <span className="text-2xl font-black">{mixedSpace.toFixed(0)} <small className="text-xs">mm</small></span>
+            <span className="text-2xl font-black">{mixedSpace.toFixed(0)} <small className="text-xs font-bold">mm</small></span>
           </div>
           <div className="text-4xl font-black italic tracking-tighter">{designOk ? '✓ OK' : '✕ FAIL'}</div>
         </div>
 
-        {/* MOVED TO MIDDLE: Action Buttons */}
-        <div className="grid grid-cols-2 gap-2 pb-4">
+        {/* Buttons */}
+        <div className="no-print grid grid-cols-2 gap-2 pb-4">
           <button onClick={copyToClipboard} className="bg-blue-600 text-white py-4 font-black uppercase text-xs tracking-widest rounded-sm active:scale-95 shadow-md">Copy Result</button>
           <button onClick={() => window.print()} className="bg-black text-white py-4 font-black uppercase text-xs tracking-widest rounded-sm active:scale-95 shadow-md">Print / PDF</button>
         </div>
-
-        {/* Spacer to push content up if screen is long */}
-        <div className="flex-1"></div>
 
       </div>
     </div>
